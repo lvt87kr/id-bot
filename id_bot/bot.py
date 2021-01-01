@@ -40,7 +40,7 @@ class IDBot(commands.Bot):
     """
 
     def __init__(self, prefix=None, token=None):
-        self._cog_list = []
+        self._ext_list = []
         self._init_time = datetime.utcnow()
 
         self.prefix = prefix
@@ -55,19 +55,21 @@ class IDBot(commands.Bot):
         logger.info("디스코드 서버와 연결되었습니다.")
 
     async def on_disconnect(self):
-        logger.warning("디스코드 서버와의 연결이 해제되었습니다.")
+        logger.info("디스코드 서버와의 연결이 해제되었습니다.")
 
     async def on_ready(self):
-        if not self._cog_list:
-            self._cog_list = [cog for cog in os.listdir("id_bot/cogs")
-                              if os.path.isdir(cog)]
+        if not self._ext_list:
+            self._ext_list = [ext for ext in os.listdir("id_bot/exts")
+                              if os.path.isdir(f"id_bot/exts/{ext}")]
 
-        for cog in self._cog_list:
+        for ext in self._ext_list:
             try:
-                self.add_cog(f"cogs.{cog}")
+                logger.info(f"확장 기능 `{ext}`을/를 로드 중입니다...")
+
+                self.load_extension(f"exts.{ext}")
             except Exception as error:
                 logger.warning(
-                    "`{}` 모듈 로드 중에 오류가 발생하였습니다: {}".format(cog, error)
+                    f"확장 기능 `{ext}`을/를 로드할 수 없습니다: \"{error}\""
                 )
 
         logger.info("ID 봇 가동 준비가 완료되었습니다.")
