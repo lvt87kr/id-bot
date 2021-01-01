@@ -30,14 +30,14 @@ from id_bot.bot import IDBot
 
 if __name__ == "__main__":
     # 로깅 모듈이 출력할 메시지의 최소 레벨을 설정한다.
-    logger = logging.getLogger('id_bot')
+    logger = logging.getLogger('id-bot')
     logger.setLevel(logging.INFO)
 
     # 로깅 모듈이 출력할 메시지의 형식을 지정한다.
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(
         logging.Formatter(
-            "%(asctime)s: [%(levelname)s]: %(message)s",
+            "%(asctime)s: [%(name)s: %(levelname)s]: %(message)s",
             "%H:%M:%S"
         ),
     )
@@ -54,10 +54,10 @@ if __name__ == "__main__":
 
         # `debug`의 값이 `true`일 경우, 디버깅 모드를 활성화한다.
         if debug.lower() == "true":
-            discord_logger = logging.getLogger('discord')
-            discord_logger.setLevel(logging.INFO)
+            logger = logging.getLogger('discord')
+            logger.setLevel(logging.INFO)
 
-            discord_logger.addHandler(handler)
+            logger.addHandler(handler)
 
         bot = IDBot(prefix, token)
         bot.run()

@@ -22,14 +22,16 @@
 # SOFTWARE.
 #
 
+from datetime import datetime
 import logging
+import os
 import sys
 
 import discord
 from discord.ext import commands
 
 
-logger = logging.getLogger('id_bot')
+logger = logging.getLogger('id-bot')
 
 
 class IDBot(commands.Bot):
@@ -38,6 +40,9 @@ class IDBot(commands.Bot):
     """
 
     def __init__(self, prefix=None, token=None):
+        self._cog_list = []
+        self._init_time = datetime.utcnow()
+
         self.prefix = prefix
         self.token = token
 
@@ -46,7 +51,32 @@ class IDBot(commands.Bot):
             description="ID 봇: 테스트 버전"
         )
 
+    async def on_connect(self):
+        logger.info("디스코드 서버와 연결되었습니다.")
+
+    async def on_disconnect(self):
+        logger.warning("디스코드 서버와의 연결이 해제되었습니다.")
+
+    async def on_ready(self):
+        if not self._cog_list:
+            self._cog_list = [cog for cog in os.listdir("id_bot/cogs")
+                              if os.path.isdir(cog)]
+
+        for cog in self._cog_list:
+            try:
+                self.add_cog(f"cogs.{cog}")
+            except Exception as error:
+                logger.warning(
+                    "`{}` 모듈 로드 중에 오류가 발생하였습니다: {}".format(cog, error)
+                )
+
+        logger.info("ID 봇 가동 준비가 완료되었습니다.")
+
     def run(self, *args, **kwargs):
+        """
+        `discord.Client`의 `run` 함수.
+        """
+
         try:
             self.loop.run_until_complete(self.start(self.token))
         except discord.LoginFailure:
