@@ -22,5 +22,5 @@
 # SOFTWARE.
 #
 
-__permissions__ = 30764096
-__version__ = "0.0.1"
+__permissions__ = 299199552
+__version__ = "0.1.0"

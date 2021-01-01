@@ -87,33 +87,34 @@ class IDBot(commands.Bot):
 
     async def handle_error(self, ctx, error):
         """
-        오류가 발생했을 때 적절한 메시지를 출력하는 함수.
+        봇 가동 중에 발생하는 오류를 처리하는 함수.
         """
 
-        color_error = self.colors["error"]
-
-        if not color_error:
-            color_error = discord.Color.red()
-
         if isinstance(error, commands.errors.BadArgument):
-            pass
+            logger.info(
+                f"사용자 `{ctx.author.name}#{ctx.author.discriminator}`이/가 "
+                f"명령어 `{ctx.message.content}`에 잘못된 인수를 사용하였습니다."
+            )
+
+            await self.send_embed(
+                ctx,
+                self.colors["error"],
+                "명령어 형식이 올바르지 않습니다.",
+                "명령어를 실행할 때 형식에 맞는 값을 입력해주세요."
+            )
         elif isinstance(error, commands.errors.CheckFailure):
             pass
         elif isinstance(error, commands.errors.CommandNotFound):
             logger.info(
                 f"사용자 `{ctx.author.name}#{ctx.author.discriminator}`이/가 "
-                f"존재하지 않는 명령어 `{ctx.message.content}`를 사용하였습니다."
+                f"존재하지 않는 명령어 `{ctx.message.content}`을/를 사용하였습니다."
             )
 
-            await ctx.send(
-                embed=discord.Embed(
-                    title="존재하지 않는 명령어입니다.",
-                    description="명령어를 정확하게 입력했는지 확인해보세요.",
-                    color=color_error
-                ).set_footer(
-                    text=f"id-bot v{__version__}",
-                    icon_url=self.user.avatar_url
-                )
+            await self.send_embed(
+                ctx,
+                self.colors["error"],
+                "존재하지 않는 명령어입니다.",
+                "명령어를 정확하게 입력했는지 확인해보세요."
             )
         elif isinstance(error, commands.errors.CommandOnCooldown):
             pass
@@ -121,6 +122,18 @@ class IDBot(commands.Bot):
             pass
         elif isinstance(error, commands.errors.MissingRequiredArgument):
             pass
+        elif isinstance(error, discord.Forbidden):
+            logger.error(
+                f"ID 봇이 명령어 `{ctx.message.content}`을/를 실행하려고 했으나"
+                f"권한이 없어 실패했습니다."
+            )
+
+            await self.send_embed(
+                ctx,
+                self.colors["error"],
+                "권한이 없습니다.",
+                "ID 봇이 이 명령어를 실행하기 위한 권한을 가지고 있지 않습니다."
+            )
         else:
             pass
 
@@ -150,3 +163,19 @@ class IDBot(commands.Bot):
             self.loop.run_until_complete(self.logout())
         finally:
             self.loop.close()
+
+    async def send_embed(self, ctx, color, title, description):
+        """
+        `discord.Embed` 형식의 메시지를 채널로 보내는 함수.
+        """
+
+        await ctx.send(
+                embed=discord.Embed(
+                    title=title,
+                    description=description,
+                    color=color
+                ).set_footer(
+                    text=f"id-bot v{__version__}",
+                    icon_url=self.user.avatar_url
+                )
+            )
