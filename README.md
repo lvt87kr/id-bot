@@ -1,5 +1,10 @@
 # id-bot
 
+![repo-size badge](https://img.shields.io/github/repo-size/lvt87kr/id-bot)
+![license badge](https://img.shields.io/github/license/lvt87kr/id-bot)
+
+![id-bot](screenshot.png)
+
 discord.py를 사용하여 다시 만든 ID 봇.
 
 ## 설치 방법
