@@ -1,3 +1,4 @@
 *.manifest
 __pycache__
+_ideas.txt
 config.json

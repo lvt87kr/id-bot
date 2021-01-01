@@ -38,27 +38,36 @@ def setup(bot):
 
 class Default(commands.Cog):
     """
-    ID 봇의 추가 기능 `roles`를 나타내는 클래스.
+    ID 봇의 추가 기능 `default`를 나타내는 클래스.
     """
 
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(help="등록된 명령어의 목록을 보여주거나, 특정 명령어의 도움말을 보여줍니다.")
     async def help(self, ctx):
-        """
-        ID 봇의 `help` 명령어.
-        """
-
         color_ok = self.bot.colors["ok"]
 
         if not color_ok:
             color_ok = discord.Color.teal()
 
+        cog_prev = None
+        command_list = ""
+
+        # 각 명령어의 이름과 설명을 찾아, `help_dict`에 추가한다.
+        for command in self.bot.walk_commands():
+            if cog_prev is None or (cog_prev is not None
+                                    and cog_prev.qualified_name
+                                    != command.cog.qualified_name):
+                cog_prev = command.cog
+                command_list += "\n"
+
+            command_list += f"`{command.name}`: {command.help}\n"
+
         await ctx.send(
             embed=discord.Embed(
-                title="도움말",
-                description="...",
+                title="도움말 📖",
+                description=command_list,
                 color=color_ok
             ).set_footer(
                 text=f"id-bot v{__version__}",
