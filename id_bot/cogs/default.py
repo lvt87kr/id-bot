@@ -43,26 +43,19 @@ class Default(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+        # `dict` 타입이랑 비슷하지만 키에 배열을 저장할 수 있음!
         self.help_dict = defaultdict(list)
 
-    @staticmethod
-    def is_int(self, num_str):
-        """
-        주어진 문자열 `num_str`를 숫자로 변환할 수 있는지 확인한다.
-        """
-
-        return num_str.lstrip("-+").isdigit()
-
     @commands.command(
-        aliases=["purge"],
+        aliases=["cl, purge"],
         brief="메시지를 일정 개수만큼 삭제합니다.",
         help="메시지를 일정 개수만큼 삭제합니다.\n\n"
              "`count`는 삭제할 메시지의 개수를 나타내며, 0보다 크고 100보다 작은 정수입니다. "
-             "`silent_mode`는 명령어의 실행 결과를 보여줄 것인지를 나타내며, 값을 따로 입력하지 "
-             "않거나 0일 경우 실행 결과를 보여주고, 값이 1일 경우 실행 결과를 보여주지 않습니다.\n",
+             "`silent_mode`는 명령어의 실행 결과를 보여줄 것인지를 나타내며, 따로 입력하지 않거나 "
+             "0일 경우 실행 결과를 보여주고, 값이 1일 경우 실행 결과를 보여주지 않습니다.\n",
         usage="<count> [silent_mode]"
     )
-    async def clear(self, ctx, count=5, silent_mode=False):
+    async def clear(self, ctx, count=3, silent_mode=False):
         if count < 1 or count > 99:
             await self.bot.send_embed(
                 ctx,
@@ -86,7 +79,10 @@ class Default(commands.Cog):
 
     @commands.command(
         brief="등록된 명령어의 목록을 보여주거나, 특정 명령어의 도움말을 보여줍니다.",
-        help="등록된 명령어의 목록을 보여주거나, 특정 명령어의 도움말을 보여줍니다."
+        help="등록된 명령어의 목록을 보여주거나, 특정 명령어의 도움말을 보여줍니다. "
+             "`command`는 도움말을 확인할 명령어를 나타내며, 따로 입력하지 않을 경우 "
+             "ID 봇에 등록되어 있는 모든 명령어의 목록을 보여줍니다.",
+        usage="[command]"
     )
     async def help(self, ctx, cmd_name=None):
         if cmd_name is None:
@@ -130,3 +126,30 @@ class Default(commands.Cog):
 
             if not found:
                 raise commands.errors.CommandNotFound()
+
+    @commands.command(
+        brief="모든 추가 기능을 다시 로드합니다.",
+        help="모든 추가 기능을 다시 로드합니다.",
+        usage=""
+    )
+    async def reload(self, ctx):
+        try:
+            self.bot.reload_cogs()
+
+            await self.bot.send_embed(
+                ctx,
+                self.bot.colors["ok"],
+                "추가 기능을 다시 로드했습니다.",
+                "총 {}개의 추가 기능을 다시 로드했습니다. "
+                "({})".format(
+                    len(self.bot.loaded_cogs),
+                    ", ".join(f"`{cog}`" for cog in self.bot.loaded_cogs)
+                )
+            )
+        except Exception:
+            await self.bot.send_embed(
+                ctx,
+                self.bot.colors["error"],
+                "추가 기능을 로드할 수 없습니다.",
+                "오류가 발생했습니다. 봇 로그를 확인해주세요.",
+            )

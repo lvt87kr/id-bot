@@ -46,6 +46,7 @@ class IDBot(commands.Bot):
         self._init_time = datetime.utcnow()
 
         self.colors = {}
+        self.loaded_cogs = []
         self.register_colors(colors)
 
         self.prefix = prefix
@@ -67,27 +68,13 @@ class IDBot(commands.Bot):
         logger.info("디스코드 서버와의 연결이 해제되었습니다.")
 
     async def on_ready(self):
-        if not self._cog_list:
-            self._cog_list = [os.path.splitext(cog)[0]
-                              for cog in os.listdir("id_bot/cogs")
-                              if os.path.isfile(f"id_bot/cogs/{cog}")]
-
-        # 추가 기능을 로드한다.
-        for cog in self._cog_list:
-            try:
-                logger.info(f"추가 기능 `{cog}`을/를 로드 중입니다...")
-
-                self.load_extension(f"cogs.{cog}")
-            except Exception as error:
-                logger.warning(
-                    f"추가 기능 `{cog}`을/를 로드할 수 없습니다: \"{error}\""
-                )
+        self.load_cogs()
 
         logger.info("ID 봇 가동 준비가 완료되었습니다. (종료하시려면 CTRL+C를 입력해주세요.)")
 
     async def handle_error(self, ctx, error):
         """
-        봇 가동 중에 발생하는 오류를 처리하는 함수.
+        봇 가동 중에 발생하는 오류를 처리한다.
         """
 
         if isinstance(error, commands.errors.BadArgument):
@@ -124,7 +111,7 @@ class IDBot(commands.Bot):
             pass
         elif isinstance(error, discord.Forbidden):
             logger.error(
-                f"ID 봇이 명령어 `{ctx.message.content}`을/를 실행하려고 했으나"
+                f"ID 봇이 명령어 `{ctx.message.content}`을/를 실행하려고 했으나 "
                 f"권한이 없어 실패했습니다."
             )
 
@@ -137,6 +124,30 @@ class IDBot(commands.Bot):
         else:
             pass
 
+    def load_cogs(self):
+        """
+        추가 기능을 로드한다.
+        """
+
+        self.loaded_cogs = []
+
+        if not self._cog_list:
+            self._cog_list = [os.path.splitext(cog)[0]
+                              for cog in os.listdir("id_bot/cogs")
+                              if os.path.isfile(f"id_bot/cogs/{cog}")]
+
+        # 추가 기능을 로드한다.
+        for cog in self._cog_list:
+            try:
+                logger.info(f"추가 기능 `{cog}`을/를 로드 중입니다...")
+
+                self.load_extension(f"cogs.{cog}")
+                self.loaded_cogs.append(cog)
+            except Exception as error:
+                logger.warning(
+                    f"추가 기능 `{cog}`을/를 로드할 수 없습니다: \"{error}\""
+                )
+
     def register_colors(self, colors):
         """
         설정 데이터에 저장된 색상 정보를 등록한다.
@@ -145,9 +156,28 @@ class IDBot(commands.Bot):
         for key, value in colors.items():
             self.colors[key] = discord.Color(int(value, 16))
 
+    def reload_cogs(self):
+        """
+        추가 기능을 다시 로드한다.
+        """
+
+        self.loaded_cogs = []
+
+        if self._cog_list:
+            for cog in self._cog_list:
+                try:
+                    logger.info(f"추가 기능 `{cog}`을/를 다시 로드 중입니다...")
+
+                    self.reload_extension(f"cogs.{cog}")
+                    self.loaded_cogs.append(cog)
+                except Exception as error:
+                    logger.warning(
+                        f"추가 기능 `{cog}`을/를 다시 로드할 수 없습니다: \"{error}\""
+                    )
+
     def run(self, *args, **kwargs):
         """
-        `discord.Client`의 `run` 함수.
+        `discord.Client`의 `run` 함수의 오버라이드이다.
         """
 
         try:
@@ -166,7 +196,7 @@ class IDBot(commands.Bot):
 
     async def send_embed(self, ctx, color, title, description):
         """
-        `discord.Embed` 형식의 메시지를 채널로 보내는 함수.
+        `discord.Embed` 형식의 메시지를 채널로 보낸다.
         """
 
         await ctx.send(
