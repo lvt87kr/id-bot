@@ -1,5 +1,9 @@
 {
-    "debug": "false",
+    "colors": {
+        "error": "0xf54747",
+        "ok": "0x5ae8b7"
+    },
+    "debug": 0,
     "prefix": "--",
     "token": "여기다가 봇 토큰 그대로 복사 + 붙여넣기하면 됨!"
 }

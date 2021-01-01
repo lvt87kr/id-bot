@@ -22,7 +22,10 @@
 # SOFTWARE.
 #
 
+import discord
 from discord.ext import commands
+
+from id_bot import __version__
 
 
 def setup(bot):
@@ -40,3 +43,25 @@ class Default(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command()
+    async def help(self, ctx):
+        """
+        ID 봇의 `help` 명령어.
+        """
+
+        color_ok = self.bot.colors["ok"]
+
+        if not color_ok:
+            color_ok = discord.Color.teal()
+
+        await ctx.send(
+            embed=discord.Embed(
+                title="도움말",
+                description="...",
+                color=color_ok
+            ).set_footer(
+                text=f"id-bot v{__version__}",
+                icon_url=self.bot.user.avatar_url
+            )
+        )

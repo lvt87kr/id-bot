@@ -49,16 +49,18 @@ if __name__ == "__main__":
         conf_file = open("config.json")
         conf_data = json.load(conf_file)
 
-        debug = conf_data["debug"]
+        colors = conf_data["colors"]
         prefix = conf_data["prefix"]
         token = conf_data["token"]
 
-        # `debug`의 값이 `true`일 경우, 디버깅 모드를 활성화한다.
-        if debug.lower() == "true":
-            logger = logging.getLogger('discord')
+        # `conf_data["debug"]`의 값이 참일 경우, 디버깅 모드를 활성화한다.
+        if conf_data["debug"]:
             logger.setLevel(logging.INFO)
 
-            logger.addHandler(handler)
+            discord_logger = logging.getLogger('discord')
+            discord_logger.setLevel(logging.INFO)
+
+            discord_logger.addHandler(handler)
 
         logger.info("                                                        ")
         logger.info(" _|        _|              _|                    _|     ")
@@ -68,9 +70,9 @@ if __name__ == "__main__":
         logger.info(" _|    _|_|_|              _|_|_|      _|_|        _|_| ")
         logger.info("                                                        ")
 
-        logger.info(f"현재 버전: {__version__}")
+        logger.info(f"현재 버전: v{__version__}")
 
-        bot = IDBot(prefix, token)
+        bot = IDBot(colors, prefix, token)
         bot.run()
     except FileNotFoundError:
         logger.error(
