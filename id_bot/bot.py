@@ -30,6 +30,8 @@ import sys
 import discord
 from discord.ext import commands
 
+from id_bot import __version__
+
 
 logger = logging.getLogger('id-bot')
 
@@ -40,7 +42,7 @@ class IDBot(commands.Bot):
     """
 
     def __init__(self, prefix=None, token=None):
-        self._ext_list = []
+        self._cog_list = []
         self._init_time = datetime.utcnow()
 
         self.prefix = prefix
@@ -48,7 +50,8 @@ class IDBot(commands.Bot):
 
         super().__init__(
             command_prefix=self.prefix,
-            description="ID 봇: 테스트 버전"
+            description=f"ID 봇: v{__version__}",
+            help_command=None
         )
 
     async def on_connect(self):
@@ -58,18 +61,19 @@ class IDBot(commands.Bot):
         logger.info("디스코드 서버와의 연결이 해제되었습니다.")
 
     async def on_ready(self):
-        if not self._ext_list:
-            self._ext_list = [ext for ext in os.listdir("id_bot/exts")
-                              if os.path.isdir(f"id_bot/exts/{ext}")]
+        if not self._cog_list:
+            self._cog_list = [os.path.splitext(cog)[0]
+                              for cog in os.listdir("id_bot/cogs")
+                              if os.path.isfile(f"id_bot/cogs/{cog}")]
 
-        for ext in self._ext_list:
+        for cog in self._cog_list:
             try:
-                logger.info(f"확장 기능 `{ext}`을/를 로드 중입니다...")
+                logger.info(f"추가 기능 `{cog}`을/를 로드 중입니다...")
 
-                self.load_extension(f"exts.{ext}")
+                self.load_extension(f"cogs.{cog}")
             except Exception as error:
                 logger.warning(
-                    f"확장 기능 `{ext}`을/를 로드할 수 없습니다: \"{error}\""
+                    f"추가 기능 `{cog}`을/를 로드할 수 없습니다: \"{error}\""
                 )
 
         logger.info("ID 봇 가동 준비가 완료되었습니다.")

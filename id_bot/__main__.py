@@ -26,6 +26,7 @@ import logging
 import json
 import sys
 
+from id_bot import __version__
 from id_bot.bot import IDBot
 
 if __name__ == "__main__":
@@ -58,6 +59,16 @@ if __name__ == "__main__":
             logger.setLevel(logging.INFO)
 
             logger.addHandler(handler)
+
+        logger.info("                                                        ")
+        logger.info(" _|        _|              _|                    _|     ")
+        logger.info("       _|_|_|              _|_|_|      _|_|    _|_|_|_| ")
+        logger.info(" _|  _|    _|  _|_|_|_|_|  _|    _|  _|    _|    _|     ")
+        logger.info(" _|  _|    _|              _|    _|  _|    _|    _|     ")
+        logger.info(" _|    _|_|_|              _|_|_|      _|_|        _|_| ")
+        logger.info("                                                        ")
+
+        logger.info(f"현재 버전: {__version__}")
 
         bot = IDBot(prefix, token)
         bot.run()
