@@ -55,7 +55,8 @@ class IDBot(commands.Bot):
         super().__init__(
             command_prefix=self.prefix,
             description=f"ID 봇: v{__version__}",
-            help_command=None
+            help_command=None,
+            intents=discord.Intents.all()
         )
 
     async def on_command_error(self, ctx, error):
@@ -79,8 +80,8 @@ class IDBot(commands.Bot):
 
         if isinstance(error, commands.errors.BadArgument):
             logger.info(
-                f"사용자 `{ctx.author.name}#{ctx.author.discriminator}`이/가 "
-                f"명령어 `{ctx.message.content}`에 잘못된 인수를 사용하였습니다."
+                f"사용자 `{ctx.author}`이/가 명령어 `{ctx.message.content}`에"
+                "잘못된 인수를 사용하였습니다."
             )
 
             await self.send_embed(
@@ -93,8 +94,8 @@ class IDBot(commands.Bot):
             pass
         elif isinstance(error, commands.errors.CommandNotFound):
             logger.info(
-                f"사용자 `{ctx.author.name}#{ctx.author.discriminator}`이/가 "
-                f"존재하지 않는 명령어 `{ctx.message.content}`을/를 사용하였습니다."
+                f"사용자 `{ctx.author}`이/가 존재하지 않는 명령어"
+                f"`{ctx.message.content}`을/를 사용하였습니다."
             )
 
             await self.send_embed(
@@ -133,15 +134,15 @@ class IDBot(commands.Bot):
 
         if not self._cog_list:
             self._cog_list = [os.path.splitext(cog)[0]
-                              for cog in os.listdir("id_bot/cogs")
-                              if os.path.isfile(f"id_bot/cogs/{cog}")]
+                              for cog in os.listdir("id_bot/cog")
+                              if os.path.isfile(f"id_bot/cog/{cog}")]
 
         # 추가 기능을 로드한다.
         for cog in self._cog_list:
             try:
                 logger.info(f"추가 기능 `{cog}`을/를 로드 중입니다...")
 
-                self.load_extension(f"cogs.{cog}")
+                self.load_extension(f"cog.{cog}")
                 self.loaded_cogs.append(cog)
             except Exception as error:
                 logger.warning(
@@ -168,7 +169,7 @@ class IDBot(commands.Bot):
                 try:
                     logger.info(f"추가 기능 `{cog}`을/를 다시 로드 중입니다...")
 
-                    self.reload_extension(f"cogs.{cog}")
+                    self.reload_extension(f"cog.{cog}")
                     self.loaded_cogs.append(cog)
                 except Exception as error:
                     logger.warning(

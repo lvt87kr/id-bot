@@ -24,7 +24,10 @@
 
 from collections import defaultdict
 
+import discord
 from discord.ext import commands
+
+from id_bot import __version__
 
 
 def setup(bot):
@@ -47,7 +50,7 @@ class Default(commands.Cog):
         self.help_dict = defaultdict(list)
 
     @commands.command(
-        aliases=["cl, purge"],
+        aliases=["cl", "purge"],
         brief="메시지를 일정 개수만큼 삭제합니다.",
         help="메시지를 일정 개수만큼 삭제합니다.\n\n"
              "`count`는 삭제할 메시지의 개수를 나타내며, 0보다 크고 100보다 작은 정수입니다. "
@@ -78,6 +81,7 @@ class Default(commands.Cog):
                 await self.bot.handle_error(ctx, error)
 
     @commands.command(
+        aliases=["hl"],
         brief="등록된 명령어의 목록을 보여주거나, 특정 명령어의 도움말을 보여줍니다.",
         help="등록된 명령어의 목록을 보여주거나, 특정 명령어의 도움말을 보여줍니다. "
              "`command`는 도움말을 확인할 명령어를 나타내며, 따로 입력하지 않을 경우 "
@@ -116,11 +120,15 @@ class Default(commands.Cog):
                 if cmd.name == cmd_name:
                     found = True
 
+                    aliases = ", ".join(f"`{alias}`" for alias in cmd.aliases)
+                    usage = f" {cmd.usage}" if cmd.usage is not None else ""
+
                     await self.bot.send_embed(
                         ctx,
                         self.bot.colors["ok"],
                         f"도움말 📖: `{cmd.name}`",
-                        f"사용법: `{cmd.name} {cmd.usage}`\n\n"
+                        f"단축 명령어: {aliases}\n"
+                        f"사용법: `{cmd.name}{usage}`\n\n"
                         f"```{cmd.help}```\n"
                     )
 
@@ -128,9 +136,10 @@ class Default(commands.Cog):
                 raise commands.errors.CommandNotFound()
 
     @commands.command(
+        aliases=["rl"],
         brief="모든 추가 기능을 다시 로드합니다.",
-        help="모든 추가 기능을 다시 로드합니다.",
-        usage=""
+        help="모든 추가 기능을 다시 로드합니다. 추가 기능 로드 중에 오류가 발생할 경우 "
+             "봇 로그를 확인해주세요."
     )
     async def reload(self, ctx):
         try:
@@ -153,3 +162,31 @@ class Default(commands.Cog):
                 "추가 기능을 로드할 수 없습니다.",
                 "오류가 발생했습니다. 봇 로그를 확인해주세요.",
             )
+
+    @commands.command(
+        aliases=["sinfo", "si"],
+        brief="서버 정보를 보여줍니다.",
+        help="서버 정보를 보여줍니다. 이 명령어를 사용하면 서버 소유자, 서버의 "
+             "멤버 수, 역할 개수 등의 서버 정보를 확인할 수 있습니다."
+    )
+    async def serverinfo(self, ctx):
+        embed = discord.Embed(
+            color=self.bot.colors["ok"]
+        ).set_author(
+            name=ctx.guild.name,
+            icon_url=ctx.guild.icon_url
+        ).add_field(
+            name="서버 소유자",
+            value="알 수 없음" if ctx.guild.owner is None
+                  else f"{ctx.guild.owner}",
+            inline=False
+        ).add_field(
+            name="서버 인원 수",
+            value=ctx.guild.member_count,
+            inline=False
+        )
+
+        await ctx.send(embed=embed.set_footer(
+            text=f"id-bot v{__version__}",
+            icon_url=self.bot.user.avatar_url
+        ))
