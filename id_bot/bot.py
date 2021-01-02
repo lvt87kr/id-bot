@@ -76,6 +76,9 @@ class IDBot(commands.Bot):
     def get_uptime(self):
         return datetime.utcnow() - self._init_time
 
+    def get_version(self):
+        return __version__
+
     async def handle_error(self, ctx, error):
         """
         봇 가동 중에 발생하는 오류를 처리한다.

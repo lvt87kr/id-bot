@@ -23,12 +23,9 @@
 #
 
 from collections import defaultdict
-from datetime import datetime
 
 import discord
 from discord.ext import commands
-
-from id_bot import __version__
 
 
 def setup(bot):
@@ -116,18 +113,23 @@ class Default(commands.Cog):
             )
         else:
             found = False
+            prefix = self.bot.prefix
 
             for cmd in self.bot.walk_commands():
                 if cmd.name == cmd_name:
                     found = True
 
                     aliases = ", ".join(f"`{alias}`" for alias in cmd.aliases)
+
+                    if not aliases:
+                        aliases = "`없음`"
+
                     usage = f" {cmd.usage}" if cmd.usage is not None else ""
 
                     await self.bot.send_embed(
                         ctx,
                         self.bot.colors["ok"],
-                        f"도움말 📖: `{cmd.name}`",
+                        f"도움말 📖: `{prefix}{cmd.name}`",
                         f"단축 명령어: {aliases}\n"
                         f"사용법: `{cmd.name}{usage}`\n\n"
                         f"```{cmd.help}```\n"
@@ -155,13 +157,21 @@ class Default(commands.Cog):
             name="로드된 추가 기능",
             value=", ".join(f"`{cog}`" for cog in self.bot.loaded_cogs),
         ).add_field(
+            name="\u200b",
+            value="\u200b"
+        ).add_field(
             name="명령어 접두사",
             value="`{prefix}` (예시: `{prefix}help`)".format(
                 prefix=self.bot.prefix
             ),
-            inline=False
+        ).add_field(
+            name="서버 지연 시간",
+            value="`{}ms`".format(int(self.bot.latency))
+        ).add_field(
+            name="\u200b",
+            value="\u200b"
         ).set_footer(
-            text=f"id-bot v{__version__}",
+            text="id-bot v{}".format(self.bot.get_version()),
             icon_url=self.bot.user.avatar_url
         )
 
@@ -217,7 +227,7 @@ class Default(commands.Cog):
             value=ctx.guild.member_count,
             inline=False
         ).set_footer(
-            text=f"id-bot v{__version__}",
+            text="id-bot v{}".format(self.bot.get_version()),
             icon_url=self.bot.user.avatar_url
         )
 

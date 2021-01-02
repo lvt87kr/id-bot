@@ -42,9 +42,9 @@ class Roles(commands.Cog):
         self.bot = bot
 
     @commands.command(
-        brief="",
-        help="",
-        usage=""
+        brief="서버 역할을 관리합니다.",
+        help="서버 역할을 관리합니다.",
+        usage="<list / join / leave / ...> [...]"
     )
     async def role(self, ctx):
         pass
