@@ -40,3 +40,11 @@ class Roles(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command(
+        brief="",
+        help="",
+        usage=""
+    )
+    async def role(self, ctx):
+        pass

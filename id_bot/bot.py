@@ -73,6 +73,9 @@ class IDBot(commands.Bot):
 
         logger.info("ID 봇 가동 준비가 완료되었습니다. (종료하시려면 CTRL+C를 입력해주세요.)")
 
+    def get_uptime(self):
+        return datetime.utcnow() - self._init_time
+
     async def handle_error(self, ctx, error):
         """
         봇 가동 중에 발생하는 오류를 처리한다.

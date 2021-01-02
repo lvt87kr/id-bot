@@ -23,6 +23,7 @@
 #
 
 from collections import defaultdict
+from datetime import datetime
 
 import discord
 from discord.ext import commands
@@ -136,6 +137,37 @@ class Default(commands.Cog):
                 raise commands.errors.CommandNotFound()
 
     @commands.command(
+        aliases=["if"],
+        brief="ID 봇의 정보를 보여줍니다.",
+        help="ID 봇의 정보를 보여줍니다. 이 명령어를 사용하면 ID 봇의 가동 시간, "
+        "로드된 추가 기능 등을 확인할 수 있습니다.",
+    )
+    async def info(self, ctx):
+        embed = discord.Embed(
+            color=self.bot.colors["ok"]
+        ).set_author(
+            name=self.bot.user,
+            icon_url=self.bot.user.avatar_url
+        ).add_field(
+            name="가동 시간",
+            value="`{}`\n\u200b".format(self.bot.get_uptime()),
+        ).add_field(
+            name="로드된 추가 기능",
+            value=", ".join(f"`{cog}`" for cog in self.bot.loaded_cogs),
+        ).add_field(
+            name="명령어 접두사",
+            value="`{prefix}` (예시: `{prefix}help`)".format(
+                prefix=self.bot.prefix
+            ),
+            inline=False
+        ).set_footer(
+            text=f"id-bot v{__version__}",
+            icon_url=self.bot.user.avatar_url
+        )
+
+        await ctx.send(embed=embed)
+
+    @commands.command(
         aliases=["rl"],
         brief="모든 추가 기능을 다시 로드합니다.",
         help="모든 추가 기능을 다시 로드합니다. 추가 기능 로드 중에 오류가 발생할 경우 "
@@ -166,8 +198,8 @@ class Default(commands.Cog):
     @commands.command(
         aliases=["sinfo", "si"],
         brief="서버 정보를 보여줍니다.",
-        help="서버 정보를 보여줍니다. 이 명령어를 사용하면 서버 소유자, 서버의 "
-             "멤버 수, 역할 개수 등의 서버 정보를 확인할 수 있습니다."
+        help="서버 정보를 보여줍니다. 이 명령어를 사용하면 서버 소유자 정보, "
+             "서버의 멤버 수 등을 확인할 수 있습니다."
     )
     async def serverinfo(self, ctx):
         embed = discord.Embed(
@@ -177,16 +209,16 @@ class Default(commands.Cog):
             icon_url=ctx.guild.icon_url
         ).add_field(
             name="서버 소유자",
-            value="알 수 없음" if ctx.guild.owner is None
-                  else f"{ctx.guild.owner}",
+            value="알 수 없음\n\u200b" if ctx.guild.owner is None
+                  else f"{ctx.guild.owner}\n\u200b",
             inline=False
         ).add_field(
             name="서버 인원 수",
             value=ctx.guild.member_count,
             inline=False
-        )
-
-        await ctx.send(embed=embed.set_footer(
+        ).set_footer(
             text=f"id-bot v{__version__}",
             icon_url=self.bot.user.avatar_url
-        ))
+        )
+
+        await ctx.send(embed=embed)
