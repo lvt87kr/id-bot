@@ -43,8 +43,59 @@ class Roles(commands.Cog):
 
     @commands.group(
         brief="서버 역할을 관리합니다.",
-        help="서버 역할을 관리합니다.",
-        usage=""
+        help="서버 역할을 관리합니다.\n\n"
+             "총 5개의 역할 관리 명령어를 사용할 수 있습니다. `role add`는 새로운 역할을 "
+             "생성하고 ID 봇의 데이터베이스에 저장하는 명령어, `role list`는 데이터베이스에 "
+             "저장된 역할을 보여주는 명령어, `role remove`는 서버 역할을 삭제하는 명령어이고, "
+             "`role set`과 `role unset`은 특정 사람에게 역할을 부여하거나, 특정 사람의 "
+             "역할을 제거하는 명령어입니다.",
+        invoke_without_command=True,
+        usage="<command> [...]"
+    )
+    @commands.check_any(
+        commands.is_owner(),
+        commands.has_permissions(manage_roles=True)
     )
     async def role(self, ctx):
+        # 존재하지 않는 명령어일 경우, 도움말 메시지를 보여준다.
+        await ctx.invoke(self.bot.get_command("help"), "role")
+
+    @role.command(name="add")
+    @commands.check_any(
+        commands.is_owner(),
+        commands.has_permissions(manage_roles=True)
+    )
+    async def role_add(self, ctx):
+        pass
+
+    @role.command(name="list")
+    @commands.check_any(
+        commands.is_owner(),
+        commands.has_permissions(manage_roles=True)
+    )
+    async def role_list(self, ctx):
+        pass
+
+    @role.command(name="remove")
+    @commands.check_any(
+        commands.is_owner(),
+        commands.has_permissions(manage_roles=True)
+    )
+    async def role_remove(self, ctx):
+        pass
+
+    @role.command(name="set")
+    @commands.check_any(
+        commands.is_owner(),
+        commands.has_permissions(manage_roles=True)
+    )
+    async def role_set(self, ctx):
+        pass
+
+    @role.command(name="unset")
+    @commands.check_any(
+        commands.is_owner(),
+        commands.has_permissions(manage_roles=True)
+    )
+    async def role_unset(self, ctx):
         pass

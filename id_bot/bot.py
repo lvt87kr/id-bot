@@ -96,7 +96,17 @@ class IDBot(commands.Bot):
                 "명령어를 실행할 때 형식에 맞는 값을 입력해주세요."
             )
         elif isinstance(error, commands.errors.CheckFailure):
-            pass
+            logger.info(
+                f"사용자 `{ctx.author}`이/가 명령어 {ctx.message.content}을/를 "
+                f"실행하려고 했으나, 권한이 없어 실패했습니다."
+            )
+
+            await self.send_embed(
+                ctx,
+                self.colors["error"],
+                "권한이 없습니다.",
+                "이 명령어를 실행하기 위한 권한을 가지고 있지 않습니다."
+            )
         elif isinstance(error, commands.errors.CommandNotFound):
             logger.info(
                 f"사용자 `{ctx.author}`이/가 존재하지 않는 명령어 "
@@ -117,15 +127,15 @@ class IDBot(commands.Bot):
             pass
         elif isinstance(error, discord.Forbidden):
             logger.error(
-                f"ID 봇이 명령어 `{ctx.message.content}`을/를 실행하려고 했으나 "
-                f"권한이 없어 실패했습니다."
+                f"ID 봇이 명령어 `{ctx.message.content}`을/를 실행하기 위해 "
+                f"필요한 서버 권한이 없습니다."
             )
 
             await self.send_embed(
                 ctx,
                 self.colors["error"],
-                "권한이 없습니다.",
-                "ID 봇이 이 명령어를 실행하기 위한 권한을 가지고 있지 않습니다."
+                "서버 권한이 없습니다.",
+                "ID 봇이 이 명령어를 실행하는 데에 필요한 서버 권한이 없습니다."
             )
         else:
             pass

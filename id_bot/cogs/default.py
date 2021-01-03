@@ -56,6 +56,10 @@ class Default(commands.Cog):
              "0일 경우 실행 결과를 보여주고, 값이 1일 경우 실행 결과를 보여주지 않습니다.\n",
         usage="<count> [silent_mode]"
     )
+    @commands.check_any(
+        commands.is_owner(),
+        commands.has_permissions(manage_messages=True)
+    )
     async def clear(self, ctx, count=3, silent_mode=False):
         if count < 1 or count > 99:
             await self.bot.send_embed(
@@ -81,7 +85,7 @@ class Default(commands.Cog):
     @commands.command(
         aliases=["hl"],
         brief="등록된 명령어의 목록을 보여주거나, 특정 명령어의 도움말을 보여줍니다.",
-        help="등록된 명령어의 목록을 보여주거나, 특정 명령어의 도움말을 보여줍니다. "
+        help="등록된 명령어의 목록을 보여주거나, 특정 명령어의 도움말을 보여줍니다.\n\n"
              "`command`는 도움말을 확인할 명령어를 나타내며, 따로 입력하지 않을 경우 "
              "ID 봇에 등록되어 있는 모든 명령어의 목록을 보여줍니다.",
         usage="[command]"
@@ -141,8 +145,8 @@ class Default(commands.Cog):
     @commands.command(
         aliases=["if"],
         brief="ID 봇의 정보를 보여줍니다.",
-        help="ID 봇의 정보를 보여줍니다. 이 명령어를 사용하면 ID 봇의 가동 시간, "
-        "로드된 추가 기능 등을 확인할 수 있습니다.",
+        help="ID 봇의 정보를 보여줍니다. \n\n"
+        "이 명령어를 사용하면 ID 봇의 가동 시간, 로드된 추가 기능 등을 확인할 수 있습니다.",
     )
     async def info(self, ctx):
         embed = discord.Embed(
@@ -180,8 +184,12 @@ class Default(commands.Cog):
     @commands.command(
         aliases=["rl"],
         brief="모든 추가 기능을 다시 로드합니다.",
-        help="모든 추가 기능을 다시 로드합니다. 추가 기능 로드 중에 오류가 발생할 경우 "
-             "봇 로그를 확인해주세요."
+        help="모든 추가 기능을 다시 로드합니다. \n\n"
+             "추가 기능 로드 중에 오류가 발생할 경우 봇 로그를 확인해주세요."
+    )
+    @commands.check_any(
+        commands.is_owner(),
+        commands.has_permissions(administrator=True)
     )
     async def reload(self, ctx):
         try:
@@ -208,8 +216,12 @@ class Default(commands.Cog):
     @commands.command(
         aliases=["sinfo", "si"],
         brief="서버 정보를 보여줍니다.",
-        help="서버 정보를 보여줍니다. 이 명령어를 사용하면 서버 소유자 정보, "
-             "서버의 멤버 수 등을 확인할 수 있습니다."
+        help="서버 정보를 보여줍니다. \n\n"
+             "이 명령어를 사용하면 서버 소유자 정보, 서버의 멤버 수 등을 확인할 수 있습니다."
+    )
+    @commands.check_any(
+        commands.is_owner(),
+        commands.has_permissions(administrator=True)
     )
     async def serverinfo(self, ctx):
         embed = discord.Embed(
