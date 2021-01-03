@@ -31,6 +31,7 @@ import discord
 from discord.ext import commands
 
 from id_bot import __version__
+from id_bot.data import RoleManager
 
 logger = logging.getLogger('id-bot')
 
@@ -46,6 +47,7 @@ class IDBot(commands.Bot):
 
         self.colors = {}
         self.loaded_cogs = []
+        self.role_manager = RoleManager()
         self.register_colors(colors)
 
         self.prefix = prefix
