@@ -32,7 +32,6 @@ from discord.ext import commands
 
 from id_bot import __version__
 
-
 logger = logging.getLogger('id-bot')
 
 
@@ -71,7 +70,7 @@ class IDBot(commands.Bot):
     async def on_ready(self):
         self.load_cogs()
 
-        logger.info("ID 봇 가동 준비가 완료되었습니다. (종료하시려면 CTRL+C를 입력해주세요.)")
+        logger.info("ID 봇 가동 준비가 완료되었습니다. (종료하시려면 `CTRL+C`를 입력해주세요.)")
 
     def get_uptime(self):
         return datetime.utcnow() - self._init_time
@@ -86,7 +85,7 @@ class IDBot(commands.Bot):
 
         if isinstance(error, commands.errors.BadArgument):
             logger.info(
-                f"사용자 `{ctx.author}`이/가 명령어 `{ctx.message.content}`에"
+                f"사용자 `{ctx.author}`이/가 명령어 `{ctx.message.content}`에 "
                 "잘못된 인수를 사용하였습니다."
             )
 
@@ -100,7 +99,7 @@ class IDBot(commands.Bot):
             pass
         elif isinstance(error, commands.errors.CommandNotFound):
             logger.info(
-                f"사용자 `{ctx.author}`이/가 존재하지 않는 명령어"
+                f"사용자 `{ctx.author}`이/가 존재하지 않는 명령어 "
                 f"`{ctx.message.content}`을/를 사용하였습니다."
             )
 
@@ -140,15 +139,15 @@ class IDBot(commands.Bot):
 
         if not self._cog_list:
             self._cog_list = [os.path.splitext(cog)[0]
-                              for cog in os.listdir("id_bot/cog")
-                              if os.path.isfile(f"id_bot/cog/{cog}")]
+                              for cog in os.listdir("id_bot/cogs")
+                              if os.path.isfile(f"id_bot/cogs/{cog}")]
 
         # 추가 기능을 로드한다.
         for cog in self._cog_list:
             try:
                 logger.info(f"추가 기능 `{cog}`을/를 로드 중입니다...")
 
-                self.load_extension(f"cog.{cog}")
+                self.load_extension(f"cogs.{cog}")
                 self.loaded_cogs.append(cog)
             except Exception as error:
                 logger.warning(
@@ -175,7 +174,7 @@ class IDBot(commands.Bot):
                 try:
                     logger.info(f"추가 기능 `{cog}`을/를 다시 로드 중입니다...")
 
-                    self.reload_extension(f"cog.{cog}")
+                    self.reload_extension(f"cogs.{cog}")
                     self.loaded_cogs.append(cog)
                 except Exception as error:
                     logger.warning(
