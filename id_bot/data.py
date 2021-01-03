@@ -45,7 +45,7 @@ class RoleManager:
 
         self.init_db()
 
-    def init_db(self):
+    def init_db(self, clear=False):
         """
         데이터베이스를 초기화한다.
         """
@@ -58,12 +58,15 @@ class RoleManager:
                     "guild_id INTEGER NOT NULL,"
                     "role_id INTEGER NOT NULL)"
                 )
+
+                if clear:
+                    self.cur.execute("DELETE FROM guild_roles")
         except Exception as error:
             logger.error(
                 f"데이터베이스 초기화 중에 오류가 발생했습니다: \"{error}\""
             )
 
-    def get_all_db(self) -> [tuple(int, int, int)]:
+    def get_all_db(self):
         try:
             with self.db:
                 self.cur.execute("SELECT * FROM GUILD_ROLES")
@@ -107,7 +110,7 @@ class RoleManager:
         try:
             with self.db:
                 self.cur.execute(
-                    "INSERT INTO GUILD_ROLES (guild_id, role_id)"
+                    "INSERT OR IGNORE INTO GUILD_ROLES (guild_id, role_id)"
                     "VALUES (?, ?)",
                     guild_id,
                     role_id

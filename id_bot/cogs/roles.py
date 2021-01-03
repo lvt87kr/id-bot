@@ -65,14 +65,10 @@ class Roles(commands.Cog):
         commands.is_owner(),
         commands.has_permissions(manage_roles=True)
     )
-    async def role_add(self, ctx):
+    async def role_add(self, ctx, name=None):
         pass
 
     @role.command(name="list")
-    @commands.check_any(
-        commands.is_owner(),
-        commands.has_permissions(manage_roles=True)
-    )
     async def role_list(self, ctx):
         pass
 
@@ -81,21 +77,13 @@ class Roles(commands.Cog):
         commands.is_owner(),
         commands.has_permissions(manage_roles=True)
     )
-    async def role_remove(self, ctx):
+    async def role_remove(self, ctx, name=None):
         pass
 
     @role.command(name="set")
-    @commands.check_any(
-        commands.is_owner(),
-        commands.has_permissions(manage_roles=True)
-    )
-    async def role_set(self, ctx):
+    async def role_set(self, ctx, name=None):
         pass
 
     @role.command(name="unset")
-    @commands.check_any(
-        commands.is_owner(),
-        commands.has_permissions(manage_roles=True)
-    )
-    async def role_unset(self, ctx):
+    async def role_unset(self, ctx, name=None):
         pass

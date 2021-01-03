@@ -75,9 +75,17 @@ class IDBot(commands.Bot):
         logger.info("ID 봇 가동 준비가 완료되었습니다. (종료하시려면 `CTRL+C`를 입력해주세요.)")
 
     def get_uptime(self):
+        """
+        ID 봇의 가동 시간을 반환한다.
+        """
+
         return datetime.utcnow() - self._init_time
 
     def get_version(self):
+        """
+        ID 봇의 버전을 반환한다.
+        """
+
         return __version__
 
     async def handle_error(self, ctx, error):
@@ -166,7 +174,7 @@ class IDBot(commands.Bot):
                     f"추가 기능 `{cog}`을/를 로드할 수 없습니다: \"{error}\""
                 )
 
-    def register_colors(self, colors):
+    def register_colors(self, colors: [str]):
         """
         설정 데이터에 저장된 색상 정보를 등록한다.
         """
@@ -212,7 +220,7 @@ class IDBot(commands.Bot):
         finally:
             self.loop.close()
 
-    async def send_embed(self, ctx, color, title, description):
+    async def send_embed(self, ctx, color, title: str, description: str):
         """
         `discord.Embed` 형식의 메시지를 채널로 보낸다.
         """
