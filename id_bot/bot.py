@@ -96,7 +96,7 @@ class IDBot(commands.Bot):
         if isinstance(error, commands.errors.BadArgument):
             logger.info(
                 f"사용자 `{ctx.author}`이/가 명령어 `{ctx.message.content}`에 "
-                "잘못된 인수를 사용하였습니다."
+                f"잘못된 형식의 인수를 사용하여 명령어 실행이 차단되었습니다."
             )
 
             await self.send_embed(
@@ -107,8 +107,8 @@ class IDBot(commands.Bot):
             )
         elif isinstance(error, commands.errors.CheckFailure):
             logger.info(
-                f"사용자 `{ctx.author}`이/가 명령어 {ctx.message.content}을/를 "
-                f"실행하려고 했으나, 권한이 없어 실패했습니다."
+                f"사용자 `{ctx.author}`이/가 명령어 `{ctx.message.content}`을/를 "
+                f"실행할 권한이 없어 명령어 실행이 차단되었습니다."
             )
 
             await self.send_embed(
@@ -130,11 +130,29 @@ class IDBot(commands.Bot):
                 "명령어를 정확하게 입력했는지 확인해보세요."
             )
         elif isinstance(error, commands.errors.CommandOnCooldown):
-            pass
-        elif isinstance(error, commands.errors.DisabledCommand):
-            pass
+            logger.info(
+                f"사용자 `{ctx.author}`이/가 명령어 `{ctx.message.content}`을/를 "
+                f"재사용 대기시간 내에 사용하여 명령어 실행이 차단되었습니다."
+            )
+
+            await self.send_embed(
+                ctx,
+                self.colors["error"],
+                "조금만 기다려주세요.",
+                f"이 명령어를 다시 사용하려면 {error.retry_after}초 더 기다려야 합니다."
+            )
         elif isinstance(error, commands.errors.MissingRequiredArgument):
-            pass
+            logger.info(
+                f"사용자 `{ctx.author}`이/가 명령어 `{ctx.message.content}`을/를 "
+                f"실행하는 데에 필요한 인수를 전달하지 않아 명령어 실행이 차단되었습니다."
+            )
+
+            await self.send_embed(
+                ctx,
+                self.colors["error"],
+                "명령어 인수 개수가 올바르지 않습니다.",
+                "명령어를 사용할 때 필요한 인수를 모두 입력해주세요."
+            )
         elif isinstance(error, discord.Forbidden):
             logger.error(
                 f"ID 봇이 명령어 `{ctx.message.content}`을/를 실행하기 위해 "
@@ -148,7 +166,10 @@ class IDBot(commands.Bot):
                 "ID 봇이 이 명령어를 실행하는 데에 필요한 서버 권한이 없습니다."
             )
         else:
-            pass
+            logger.error(
+                f"사용자 `{ctx.author}`이/가 사용한 명령어 `{ctx.message.content}`을/를 "
+                f"실행하다가 알 수 없는 오류가 발생하였습니다: \"{error}\""
+            )
 
     def load_cogs(self):
         """
