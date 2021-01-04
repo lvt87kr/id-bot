@@ -76,7 +76,7 @@ class Default(commands.Cog):
                     await self.bot.send_embed(
                         ctx,
                         self.bot.colors["ok"],
-                        "실행 결과",
+                        "메시지가 삭제되었습니다.",
                         "총 {}개의 메시지가 삭제되었습니다.".format(len(result))
                     )
             except Exception as error:
@@ -95,25 +95,27 @@ class Default(commands.Cog):
             if not self.help_dict:
                 # 각 명령어의 이름과 설명을 찾고 분류하여, `self.help_dict`에 추가한다.
                 for cmd in self.bot.walk_commands():
-                    cog_name = cmd.cog.qualified_name
-                    self.help_dict[cog_name].append(
-                        f"`{cmd.name}`: {cmd.brief}\n"
-                    )
+                    if not cmd.parents:
+                        cog_name = cmd.cog.qualified_name
 
-            cmd_list = ""
+                        self.help_dict[cog_name].append(
+                            f"`{cmd.name}`: {cmd.brief}\n"
+                        )
+
+            cmds_str = ""
 
             # 명령어의 이름과 설명을 내림차순으로 정렬한다.
             for cog_name in self.help_dict:
-                cmd_list += "\n"
+                cmds_str += f"\n**🔧 추가 기능:** `{cog_name}`\n\n"
 
                 for text in sorted(self.help_dict[cog_name]):
-                    cmd_list += text
+                    cmds_str += text
 
             await self.bot.send_embed(
                 ctx,
                 self.bot.colors["ok"],
-                "도움말 📖",
-                cmd_list,
+                "📖 도움말",
+                cmds_str
             )
         else:
             found = False
@@ -133,7 +135,7 @@ class Default(commands.Cog):
                     await self.bot.send_embed(
                         ctx,
                         self.bot.colors["ok"],
-                        f"도움말 📖: `{prefix}{cmd.name}`",
+                        f"📖 도움말: `{prefix}{cmd.name}`",
                         f"단축 명령어: {aliases}\n"
                         f"사용법: `{cmd.name}{usage}`\n\n"
                         f"```{cmd.help}```\n"
@@ -185,7 +187,7 @@ class Default(commands.Cog):
         aliases=["rl"],
         brief="모든 추가 기능을 다시 로드합니다.",
         help="모든 추가 기능을 다시 로드합니다. \n\n"
-             "추가 기능 로드 중에 오류가 발생할 경우 봇 로그를 확인해주세요."
+             "추가 기능 로드 중에 오류가 발생할 경우 봇 관리자님께 오류 신고를 해주세요."
     )
     @commands.check_any(
         commands.is_owner(),

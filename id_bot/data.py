@@ -25,6 +25,7 @@
 import logging
 from os import path
 import sqlite3
+import typing
 
 logger = logging.getLogger('id-bot.data')
 
@@ -52,6 +53,8 @@ class RoleManager:
 
         try:
             with self.db:
+                logger.info("데이터베이스를 초기화하는 중입니다...")
+
                 self.cur.execute(
                     "CREATE TABLE IF NOT EXISTS guild_roles ("
                     "id INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -59,6 +62,7 @@ class RoleManager:
                     "role_id INTEGER NOT NULL)"
                 )
 
+                # `clear`의 값이 참이면, 데이터베이스에 존재하는 모든 값을 삭제한다.
                 if clear:
                     self.cur.execute("DELETE FROM guild_roles")
         except Exception as error:
@@ -66,13 +70,20 @@ class RoleManager:
                 f"데이터베이스 초기화 중에 오류가 발생했습니다: \"{error}\""
             )
 
-    def get_all_db(self):
+    def get_all_db(self) -> [typing.Tuple[int, int, int]]:
+        """
+        데이터베이스에 등록된 모든 정보를 불러온다.
+        """
+
         try:
             with self.db:
-                self.cur.execute("SELECT * FROM GUILD_ROLES")
+                logger.info("데이터베이스에 등록된 모든 정보를 불러오는 중입니다...")
 
-                result = self.cur.fetchall()
-                print(result)
+                self.cur.execute(
+                    "SELECT * FROM GUILD_ROLES"
+                )
+
+                return self.cur.fetchall()
         except Exception as error:
             logger.error(
                 f"데이터베이스 작업 처리 중에 오류가 발생했습니다: \"{error}\""
@@ -80,21 +91,22 @@ class RoleManager:
 
     def get_roles_db(self, guild_id: int) -> [int]:
         """
-        ID가 `guild_id`인 디스코드 서버의 역할을 데이터베이스에서 찾고,
-        그 목록을 반환한다.
+        ID가 `guild_id`인 디스코드 서버의 역할을 데이터베이스에서 찾아,
+        역할 ID의 목록을 반환한다.
         """
 
         result = []
 
         try:
             with self.db:
+                logger.info("데이터베이스에 등록된 서버 역할 정보를 불러오는 중입니다...")
+
                 self.cur.execute(
                     "SELECT role_id FROM GUILD_ROLES WHERE guild_id = ?",
-                    guild_id
+                    (guild_id, )
                 )
 
-                result = self.cur.fetchall()
-                print(result)
+                return self.cur.fetchall()
         except Exception as error:
             logger.error(
                 f"데이터베이스 작업 처리 중에 오류가 발생했습니다: \"{error}\""
@@ -109,11 +121,12 @@ class RoleManager:
 
         try:
             with self.db:
+                logger.info("데이터베이스에 새로운 역할을 추가하는 중입니다...")
+
                 self.cur.execute(
                     "INSERT OR IGNORE INTO GUILD_ROLES (guild_id, role_id)"
                     "VALUES (?, ?)",
-                    guild_id,
-                    role_id
+                    (guild_id, role_id)
                 )
 
                 # 변경 사항을 저장한다.
@@ -129,11 +142,12 @@ class RoleManager:
         """
         try:
             with self.db:
+                logger.info("데이터베이스에 기존 역할을 제거하는 중입니다...")
+
                 self.cur.execute(
                     "DELETE FROM GUILD_ROLES "
                     "WHERE guild_id = ? AND role_id = ?",
-                    guild_id,
-                    role_id
+                    (guild_id, role_id)
                 )
 
                 # 변경 사항을 저장한다.

@@ -22,7 +22,15 @@
 # SOFTWARE.
 #
 
+import logging
+import random
+
+import discord
+
+from discord import Color, Permissions
 from discord.ext import commands
+
+logger = logging.getLogger('id-bot.cogs.roles')
 
 
 def setup(bot):
@@ -47,7 +55,7 @@ class Roles(commands.Cog):
              "총 5개의 역할 관리 명령어를 사용할 수 있습니다. `role add`는 새로운 역할을 "
              "생성하고 ID 봇의 데이터베이스에 저장하는 명령어, `role list`는 데이터베이스에 "
              "저장된 역할을 보여주는 명령어, `role remove`는 서버 역할을 삭제하는 명령어이고, "
-             "`role set`과 `role unset`은 특정 사람에게 역할을 부여하거나, 특정 사람의 "
+             "`role set`과 `role unset`은 사용한 사람에게 역할을 부여하거나, 사용한 사람의 "
              "역할을 제거하는 명령어입니다.",
         invoke_without_command=True,
         usage="<command> [...]"
@@ -60,30 +68,179 @@ class Roles(commands.Cog):
         # 존재하지 않는 명령어일 경우, 도움말 메시지를 보여준다.
         await ctx.invoke(self.bot.get_command("help"), "role")
 
-    @role.command(name="add")
+    @role.command(
+        name="add",
+        usage="<role>"
+    )
     @commands.check_any(
         commands.is_owner(),
         commands.has_permissions(manage_roles=True)
     )
     async def role_add(self, ctx, name=None):
-        pass
+        if name is None:
+            # TODO: 도움말 메시지 추가
+            pass
+        else:
+            logger.info(f"새로운 역할 `{name}`을 생성하는 중입니다...")
+
+            try:
+                permissions = Permissions(
+                    add_reactions=True,
+                    stream=True,
+                    read_messages=True,
+                    send_messages=True,
+                    send_tts_messages=True,
+                    attach_files=True,
+                    read_message_history=True,
+                    connect=True,
+                    speak=True,
+                    change_nickname=True
+                )
+
+                new_role = await ctx.guild.create_role(
+                    name=name,
+                    permissions=permissions,
+                    color=Color.from_hsv(random.random(), 1, 1),
+                    reason=f"`{ctx.author}`이/가 역할 생성"
+                )
+
+                self.bot.role_manager.add_role_to_db(ctx.guild.id, new_role.id)
+
+                await self.bot.send_embed(
+                    ctx,
+                    self.bot.colors["ok"],
+                    "역할을 생성하였습니다.",
+                    f"역할 `{name}`을/를 생성하였습니다."
+                )
+            except Exception:
+                await self.bot.send_embed(
+                    ctx,
+                    self.bot.colors["error"],
+                    "역할을 생성할 수 없습니다.",
+                    "역할 생성 중에 오류가 발생하였습니다."
+                    "봇 관리자님께 오류 신고를 해주세요."
+                )
 
     @role.command(name="list")
     async def role_list(self, ctx):
-        pass
+        try:
+            id_tuples = self.bot.role_manager.get_roles_db(ctx.guild.id)
 
-    @role.command(name="remove")
+            roles_str = ",".join(
+                "`{}`".format(
+                    ctx.guild.get_role(id_tuple[0]).name
+                ) for id_tuple in id_tuples
+            )
+
+            if not roles_str:
+                roles_str = "`없음`"
+
+            await self.bot.send_embed(
+                ctx,
+                self.bot.colors["ok"],
+                "역할 목록",
+                roles_str
+            )
+        except Exception:
+            await self.bot.send_embed(
+                ctx,
+                self.bot.colors["error"],
+                "역할 목록을 불러올 수 없습니다.",
+                "역할 목록을 불러오는 중에 오류가 발생하였습니다. "
+                "봇 관리자님께 오류 신고를 해주세요."
+            )
+
+    @role.command(
+        name="remove",
+        usage="<role>"
+    )
     @commands.check_any(
         commands.is_owner(),
         commands.has_permissions(manage_roles=True)
     )
     async def role_remove(self, ctx, name=None):
-        pass
+        if name is None:
+            # TODO: 도움말 메시지 추가
+            pass
+        else:
+            role = discord.utils.get(ctx.guild.roles, name=name)
 
-    @role.command(name="set")
+            # 주어진 이름을 가진 역할이 존재하지 않는 경우?
+            if not isinstance(role, discord.Role):
+                await self.bot.send_embed(
+                    ctx,
+                    self.bot.colors["error"],
+                    "존재하지 않는 역할입니다.",
+                    "주어진 이름을 가진 역할이 존재하지 않습니다."
+                )
+            else:
+                try:
+                    self.bot.role_manager.remove_role_from_db(
+                        ctx.guild.id,
+                        role.id
+                    )
+
+                    await role.delete(reason="`{ctx.author}`이/가 역할 삭제")
+
+                    await self.bot.send_embed(
+                        ctx,
+                        self.bot.colors["ok"],
+                        "역할을 삭제하였습니다.",
+                        f"역할 `{name}`을/를 삭제하였습니다."
+                    )
+                except Exception:
+                    await self.bot.send_embed(
+                        ctx,
+                        self.bot.colors["error"],
+                        "역할을 삭제할 수 없습니다.",
+                        "역할 삭제 중에 오류가 발생하였습니다. "
+                        "봇 관리자님께 오류 신고를 해주세요."
+                    )
+
+    @role.command(
+        name="set",
+        usage="<role>"
+    )
     async def role_set(self, ctx, name=None):
-        pass
+        if name is None:
+            # TODO: 도움말 메시지 추가
+            pass
+        else:
+            role = discord.utils.get(ctx.guild.roles, name=name)
 
-    @role.command(name="unset")
+            if not isinstance(role, discord.Role):
+                await self.bot.send_embed(
+                    ctx,
+                    self.bot.colors["error"],
+                    "존재하지 않는 역할입니다.",
+                    "주어진 이름을 가진 역할이 존재하지 않습니다."
+                )
+            else:
+                await ctx.author.add_roles(
+                    role,
+                    reason="`{ctx.author}`이/가 자신에게 역할 부여"
+                )
+
+    @role.command(
+        name="unset",
+        usage="<role>"
+    )
     async def role_unset(self, ctx, name=None):
-        pass
+        if name is None:
+            # TODO: 도움말 메시지 추가
+            pass
+        else:
+            role = discord.utils.get(ctx.guild.roles, name=name)
+
+            if not isinstance(role, discord.Role):
+                await self.bot.send_embed(
+                    ctx,
+                    self.bot.colors["error"],
+                    "존재하지 않는 역할입니다.",
+                    "주어진 이름을 가진 역할이 존재하지 않습니다."
+                )
+            else:
+                await ctx.author.remove_roles(
+                    role,
+                    reason="`{ctx.author}`이/가 자신의 역할 제거"
+                )
