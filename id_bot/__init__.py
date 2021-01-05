@@ -23,4 +23,4 @@
 #
 
 __permissions__ = 299199552
-__version__ = "0.4.0"
+__version__ = "0.5.0"

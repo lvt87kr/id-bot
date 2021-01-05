@@ -52,11 +52,11 @@ class Roles(commands.Cog):
     @commands.group(
         brief="서버 역할을 관리합니다.",
         help="서버 역할을 관리합니다.\n\n"
-             "총 5개의 역할 관리 명령어를 사용할 수 있습니다. `role add`는 새로운 역할을 "
-             "생성하고 ID 봇의 데이터베이스에 저장하는 명령어, `role list`는 데이터베이스에 "
-             "저장된 역할을 보여주는 명령어, `role remove`는 서버 역할을 삭제하는 명령어이고, "
-             "`role set`과 `role unset`은 사용한 사람에게 역할을 부여하거나, 사용한 사람의 "
-             "역할을 제거하는 명령어입니다.",
+             "총 5개의 역할 관리 명령어를 사용할 수 있습니다. `role add`는 서버에 새로운 역할을 "
+             "추가하고 데이터베이스에 저장하는 명령어, `role list`는 데이터베이스에 저장된 모든 "
+             "역할을 보여주는 명령어, `role remove`는 주어진 역할을 서버에서 제거하는 명령어이고, "
+             "`role set`과 `role unset`은 사용한 사람에게 역할을 부여하거나, 부여된 역할을 "
+             "제거하는 명령어입니다.",
         invoke_without_command=True,
         usage="<command> [...]"
     )
@@ -69,6 +69,11 @@ class Roles(commands.Cog):
         await ctx.invoke(self.bot.get_command("help"), "role")
 
     @role.command(
+        brief="서버에 새로운 역할을 추가합니다.",
+        help="서버에 새로운 역할을 추가합니다.\n\n"
+             "`role`은 추가할 역할의 이름을 나타냅니다. 새로운 역할을 생성하면 역할 색상은 "
+             "무작위로 정해지며, 권한 플래그 값은 `70356032`가 됩니다. 또한 역할을 생성하면 "
+             "ID 봇의 데이터베이스에 역할 정보가 자동으로 추가됩니다.",
         name="add",
         usage="<role>"
     )
@@ -81,37 +86,55 @@ class Roles(commands.Cog):
             # TODO: 도움말 메시지 추가
             pass
         else:
-            logger.info(f"새로운 역할 `{name}`을 생성하는 중입니다...")
+            logger.info(
+                "서버 `{}`에서 새로운 역할 `{}`을 생성하는 중입니다...".format(
+                    ctx.guild.id,
+                    name
+                )
+            )
 
             try:
-                permissions = Permissions(
-                    add_reactions=True,
-                    stream=True,
-                    read_messages=True,
-                    send_messages=True,
-                    send_tts_messages=True,
-                    attach_files=True,
-                    read_message_history=True,
-                    connect=True,
-                    speak=True,
-                    change_nickname=True
-                )
+                role = discord.utils.get(ctx.guild.roles, name=name)
 
-                new_role = await ctx.guild.create_role(
-                    name=name,
-                    permissions=permissions,
-                    color=Color.from_hsv(random.random(), 1, 1),
-                    reason=f"`{ctx.author}`이/가 역할 생성"
-                )
+                # 주어진 이름을 가진 역할이 이미 존재하는 경우?
+                if isinstance(role, discord.Role):
+                    await self.bot.send_embed(
+                        ctx,
+                        self.bot.colors["error"],
+                        "이미 존재하는 역할입니다.",
+                        "주어진 이름을 가진 역할이 이미 존재합니다."
+                    )
+                else:
+                    permissions = Permissions(
+                        add_reactions=True,
+                        stream=True,
+                        read_messages=True,
+                        send_messages=True,
+                        attach_files=True,
+                        read_message_history=True,
+                        connect=True,
+                        speak=True,
+                        change_nickname=True
+                    )
 
-                self.bot.role_manager.add_role_to_db(ctx.guild.id, new_role.id)
+                    new_role = await ctx.guild.create_role(
+                        name=name,
+                        permissions=permissions,
+                        color=Color.from_hsv(random.random(), 1, 1),
+                        reason=f"`{ctx.author}`이/가 역할 생성"
+                    )
 
-                await self.bot.send_embed(
-                    ctx,
-                    self.bot.colors["ok"],
-                    "역할을 생성하였습니다.",
-                    f"역할 `{name}`을/를 생성하였습니다."
-                )
+                    self.bot.role_manager.add_role_to_db(
+                        ctx.guild.id,
+                        new_role.id
+                    )
+
+                    await self.bot.send_embed(
+                        ctx,
+                        self.bot.colors["ok"],
+                        "역할을 생성하였습니다.",
+                        f"역할 `{name}`을/를 생성하였습니다."
+                    )
             except Exception:
                 await self.bot.send_embed(
                     ctx,
@@ -121,7 +144,12 @@ class Roles(commands.Cog):
                     "봇 관리자님께 오류 신고를 해주세요."
                 )
 
-    @role.command(name="list")
+    @role.command(
+        brief="데이터베이스에 저장된 모든 역할을 보여줍니다.",
+        help="데이터베이스에 저장된 모든 역할을 보여줍니다.\n\n"
+             "이 명령어를 사용하면 ID 봇의 데이터베이스에 저장된 역할을 모두 불러와 출력합니다.",
+        name="list"
+    )
     async def role_list(self, ctx):
         try:
             id_tuples = self.bot.role_manager.get_roles_db(ctx.guild.id)
@@ -151,6 +179,10 @@ class Roles(commands.Cog):
             )
 
     @role.command(
+        brief="주어진 역할을 서버에서 제거합니다.",
+        help="주어진 역할을 서버에서 제거합니다.\n\n"
+             "`role`은 제거할 역할의 이름을 나타냅니다. 역할을 제거하면 ID 봇의 데이터베이스에 "
+             "저장된 역할 정보도 같이 제거됩니다.",
         name="remove",
         usage="<role>"
     )
@@ -174,6 +206,13 @@ class Roles(commands.Cog):
                     "주어진 이름을 가진 역할이 존재하지 않습니다."
                 )
             else:
+                logger.info(
+                    "서버 `{}`의 역할 `{}`을 제거하는 중입니다...".format(
+                        ctx.guild.id,
+                        name
+                    )
+                )
+
                 try:
                     self.bot.role_manager.remove_role_from_db(
                         ctx.guild.id,
@@ -198,6 +237,9 @@ class Roles(commands.Cog):
                     )
 
     @role.command(
+        brief="사용자에게 역할을 부여합니다.",
+        help="사용자에게 역할을 부여합니다.\n\n"
+             "`role`은 사용자에게 부여할 역할의 이름을 나타냅니다.",
         name="set",
         usage="<role>"
     )
@@ -221,7 +263,17 @@ class Roles(commands.Cog):
                     reason="`{ctx.author}`이/가 자신에게 역할 부여"
                 )
 
+                await self.bot.send_embed(
+                    ctx,
+                    self.bot.colors["ok"],
+                    "역할을 부여하였습니다.",
+                    f"사용자 `{ctx.author}`에게 역할 `{name}`을 부여하였습니다."
+                )
+
     @role.command(
+        brief="사용자에게 부여된 역할을 제거합니다.",
+        help="사용자에게 부여된 역할을 제거합니다.\n\n"
+             "`role`은 사용자에게서 제거할 역할의 이름을 나타냅니다.",
         name="unset",
         usage="<role>"
     )
@@ -243,4 +295,11 @@ class Roles(commands.Cog):
                 await ctx.author.remove_roles(
                     role,
                     reason="`{ctx.author}`이/가 자신의 역할 제거"
+                )
+
+                await self.bot.send_embed(
+                    ctx,
+                    self.bot.colors["ok"],
+                    "역할을 제거하였습니다.",
+                    f"사용자 `{ctx.author}`의 역할 `{name}`을 제거하였습니다."
                 )
