@@ -87,15 +87,17 @@ class Default(commands.Cog):
         brief="등록된 명령어의 목록을 보여주거나, 특정 명령어의 도움말을 보여줍니다.",
         help="등록된 명령어의 목록을 보여주거나, 특정 명령어의 도움말을 보여줍니다.\n\n"
              "`command`는 도움말을 확인할 명령어를 나타내며, 따로 입력하지 않을 경우 "
-             "ID 봇에 등록되어 있는 모든 명령어의 목록을 보여줍니다.",
-        usage="[command]"
+             "ID 봇에 등록되어 있는 모든 명령어의 목록을 보여줍니다. 특정 명령어의 하위 "
+             "명령어에 대한 도움말을 확인하려면 `help role add`와 같이 명령어 뒤에 "
+             "하위 명령어를 입력해주면 됩니다.",
+        usage="[command] [...]"
     )
-    async def help(self, ctx, cmd_name=None):
-        if cmd_name is None:
+    async def help(self, ctx, *args):
+        if not len(args):
             if not self.help_dict:
                 # 각 명령어의 이름과 설명을 찾고 분류하여, `self.help_dict`에 추가한다.
                 for cmd in self.bot.walk_commands():
-                    if not cmd.parents:
+                    if not cmd.parent:
                         cog_name = cmd.cog.qualified_name
 
                         self.help_dict[cog_name].append(
@@ -120,26 +122,45 @@ class Default(commands.Cog):
         else:
             found = False
             prefix = self.bot.prefix
+            usage = ""
 
             for cmd in self.bot.walk_commands():
-                if cmd.name == cmd_name:
-                    found = True
+                if len(args) == 1:
+                    if cmd.name == args[0]:
+                        found = True
 
-                    aliases = ", ".join(f"`{alias}`" for alias in cmd.aliases)
+                        aliases = ", ".join(
+                            f"`{alias}`" for alias in cmd.aliases
+                        )
 
-                    if not aliases:
-                        aliases = "`없음`"
+                        if not aliases:
+                            aliases = "`없음`"
 
-                    usage = f" {cmd.usage}" if cmd.usage is not None else ""
+                        if cmd.usage is not None:
+                            usage = f" {cmd.usage}"
 
-                    await self.bot.send_embed(
-                        ctx,
-                        self.bot.colors["ok"],
-                        f"📖 도움말: `{prefix}{cmd.name}`",
-                        f"단축 명령어: {aliases}\n"
-                        f"사용법: `{cmd.name}{usage}`\n\n"
-                        f"```{cmd.help}```\n"
-                    )
+                        await self.bot.send_embed(
+                            ctx,
+                            self.bot.colors["ok"],
+                            f"📖 도움말: `{prefix}{cmd.name}`",
+                            f"단축 명령어: {aliases}\n"
+                            f"사용법: `{cmd.name} {usage}`\n\n"
+                            f"```{cmd.help}```\n"
+                        )
+                else:
+                    if cmd.name == args[1] and cmd.parent.name == args[0]:
+                        found = True
+
+                        if cmd.usage is not None:
+                            usage = f" {cmd.usage}"
+
+                        await self.bot.send_embed(
+                            ctx,
+                            self.bot.colors["ok"],
+                            f"📖 도움말: `{prefix}{args[0]} {cmd.name}`",
+                            f"사용법: `{args[0]} {cmd.name} {usage}`\n\n"
+                            f"```{cmd.help}```\n"
+                        )
 
             if not found:
                 raise commands.errors.CommandNotFound()

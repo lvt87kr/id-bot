@@ -83,8 +83,7 @@ class Roles(commands.Cog):
     )
     async def role_add(self, ctx, name=None):
         if name is None:
-            # TODO: 도움말 메시지 추가
-            pass
+            await ctx.invoke(self.bot.get_command("help"), "role", "add")
         else:
             logger.info(
                 "서버 `{}`에서 새로운 역할 `{}`을 생성하는 중입니다...".format(
@@ -192,8 +191,7 @@ class Roles(commands.Cog):
     )
     async def role_remove(self, ctx, name=None):
         if name is None:
-            # TODO: 도움말 메시지 추가
-            pass
+            await ctx.invoke(self.bot.get_command("help"), "role", "remove")
         else:
             role = discord.utils.get(ctx.guild.roles, name=name)
 
@@ -245,8 +243,7 @@ class Roles(commands.Cog):
     )
     async def role_set(self, ctx, name=None):
         if name is None:
-            # TODO: 도움말 메시지 추가
-            pass
+            await ctx.invoke(self.bot.get_command("help"), "role", "set")
         else:
             role = discord.utils.get(ctx.guild.roles, name=name)
 
@@ -279,8 +276,7 @@ class Roles(commands.Cog):
     )
     async def role_unset(self, ctx, name=None):
         if name is None:
-            # TODO: 도움말 메시지 추가
-            pass
+            await ctx.invoke(self.bot.get_command("help"), "role", "unset")
         else:
             role = discord.utils.get(ctx.guild.roles, name=name)
 
