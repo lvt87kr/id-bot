@@ -21,7 +21,7 @@
 11:35:52: [id-bot: INFO]: 디스코드 서버와의 연결이 해제되었습니다.
 ```
 
-[discord.py](https://github.com/Rapptz/discord.py)를 사용하여 다시 만든 ID 봇.
+[discord.py](https://github.com/Rapptz/discord.py) 라이브러리로 만든 디스코드 봇.
 
 ## 프로젝트 구조
 
